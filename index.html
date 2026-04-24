@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>裕介みっけ 〜ロンドンで頑張るキミへ〜</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f5efe0;
+    --paper: #faf6ea;
+    --ink: #1a2d4a;
+    --accent: #c9302c;
+    --gold: #b8860b;
+    --shadow: rgba(0,0,0,0.15);
+  }
+  body {
+    font-family: "游明朝", "Yu Mincho", "Hiragino Mincho ProN", "MS P明朝", serif;
+    background: var(--bg);
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(255,255,255,0.4) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(255,255,255,0.3) 0%, transparent 50%);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  .wrap { width: 100%; max-width: 600px; }
+  header { text-align: center; margin-bottom: 20px; }
+  .title {
+    font-size: 32px;
+    letter-spacing: 6px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .subtitle {
+    font-size: 13px;
+    opacity: 0.7;
+    letter-spacing: 3px;
+  }
+  .date {
+    margin-top: 16px;
+    font-size: 14px;
+    color: var(--gold);
+    letter-spacing: 1px;
+  }
+
+  /* 封筒 */
+  .envelope-wrap {
+    position: relative;
+    width: 100%;
+    height: 280px;
+    margin: 30px 0;
+    cursor: pointer;
+    user-select: none;
+  }
+  .envelope {
+    position: relative;
+    width: 90%;
+    max-width: 380px;
+    height: 240px;
+    margin: 0 auto;
+    background: #fdfaf0;
+    border: 2px solid var(--ink);
+    box-shadow: 0 10px 30px var(--shadow);
+    transition: transform 0.6s ease;
+    overflow: hidden;
+  }
+  .envelope.opened { transform: translateY(-6px); }
+  .flap {
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    height: 120px;
+    background: #f0e4d0;
+    border: 2px solid var(--ink);
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    transform-origin: top;
+    transition: transform 0.8s ease;
+    z-index: 3;
+  }
+  .envelope.opened .flap { transform: rotateX(180deg); z-index: 1; }
+  .stamp {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    width: 56px;
+    height: 56px;
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    transform: rotate(-15deg);
+    z-index: 4;
+    background: rgba(253, 250, 240, 0.9);
+  }
+  .envelope-label {
+    position: absolute;
+    bottom: 46px;
+    left: 0; right: 0;
+    text-align: center;
+    font-size: 18px;
+    letter-spacing: 4px;
+    z-index: 2;
+  }
+  .tap-hint {
+    position: absolute;
+    bottom: 18px;
+    left: 0; right: 0;
+    text-align: center;
+    font-size: 12px;
+    opacity: 0.6;
+    z-index: 2;
+    animation: pulse 2s infinite;
+    letter-spacing: 2px;
+  }
+  .envelope.opened .tap-hint { display: none; }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+
+  /* 便箋 */
+  .letter {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.8s ease 0.4s;
+    background: var(--paper);
+    border: 1px solid rgba(0,0,0,0.1);
+    padding: 36px 28px 50px;
+    box-shadow: 0 5px 20px var(--shadow);
+    position: relative;
+    display: none;
+    background-image: repeating-linear-gradient(
+      to bottom, transparent, transparent 29px, rgba(26,45,74,0.08) 30px
+    );
+  }
+  .letter.show { display: block; opacity: 1; transform: translateY(0); }
+  .category-tag {
+    display: inline-block;
+    font-size: 11px;
+    color: var(--gold);
+    letter-spacing: 3px;
+    border: 1px solid var(--gold);
+    padding: 4px 12px;
+    margin-bottom: 20px;
+  }
+  .message-text {
+    font-size: 19px;
+    line-height: 2;
+    margin-bottom: 30px;
+    white-space: pre-wrap;
+  }
+  .signature {
+    text-align: right;
+    font-size: 13px;
+    opacity: 0.7;
+    letter-spacing: 1px;
+  }
+  .seal {
+    position: absolute;
+    bottom: 18px;
+    right: 22px;
+    width: 46px;
+    height: 46px;
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    font-size: 16px;
+    font-weight: bold;
+    transform: rotate(-10deg);
+    background: rgba(250,246,234,0.8);
+  }
+
+  /* ボタン */
+  .actions {
+    display: none;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 26px;
+    flex-wrap: wrap;
+  }
+  .actions.show { display: flex; }
+  .btn {
+    background: var(--paper);
+    border: 1.5px solid var(--ink);
+    color: var(--ink);
+    padding: 10px 18px;
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 1px;
+  }
+  .btn:hover { background: var(--ink); color: var(--paper); }
+  .btn.fav-on {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+
+  /* モーダル */
+  .modal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    padding: 20px;
+  }
+  .modal.show { display: flex; }
+  .modal-content {
+    background: var(--paper);
+    width: 100%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 30px 24px;
+    position: relative;
+  }
+  .modal-title {
+    text-align: center;
+    font-size: 18px;
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+  }
+  .modal-close {
+    position: absolute;
+    top: 10px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    color: var(--ink);
+  }
+  .past-item {
+    border-bottom: 1px dashed rgba(0,0,0,0.2);
+    padding: 14px 0;
+  }
+  .past-item:last-child { border-bottom: none; }
+  .past-date {
+    font-size: 12px;
+    color: var(--gold);
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+  }
+  .past-text { font-size: 14px; line-height: 1.7; }
+  .empty-note {
+    text-align: center;
+    font-size: 14px;
+    opacity: 0.6;
+    padding: 30px 0;
+    line-height: 1.8;
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 50px;
+    padding-top: 26px;
+    border-top: 1px solid rgba(26,45,74,0.2);
+  }
+  .motto {
+    font-size: 15px;
+    letter-spacing: 4px;
+    margin-bottom: 8px;
+  }
+  .from {
+    font-size: 12px;
+    color: var(--gold);
+    letter-spacing: 1px;
+  }
+
+  @media (max-width: 480px) {
+    .title { font-size: 26px; letter-spacing: 4px; }
+    .envelope-wrap { height: 240px; }
+    .envelope { height: 200px; }
+    .flap { height: 100px; }
+    .message-text { font-size: 17px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 class="title">裕介みっけ</h1>
+    <p class="subtitle">ロンドンで頑張るキミへ</p>
+    <p class="date" id="date"></p>
+  </header>
+
+  <div class="envelope-wrap" id="envelopeWrap">
+    <div class="envelope" id="envelope">
+      <div class="flap"></div>
+      <div class="stamp">JAPAN</div>
+      <div class="envelope-label">今日の一言</div>
+      <div class="tap-hint">▼ タップして開く ▼</div>
+    </div>
+  </div>
+
+  <article class="letter" id="letter">
+    <span class="category-tag" id="categoryTag"></span>
+    <p class="message-text" id="messageText"></p>
+    <p class="signature" id="signature"></p>
+    <div class="seal">心</div>
+  </article>
+
+  <div class="actions" id="actions">
+    <button class="btn" id="favBtn">☆ お気に入り</button>
+    <button class="btn" id="randomBtn">🎲 もう一度引く</button>
+    <button class="btn" id="pastBtn">📅 過去を見る</button>
+  </div>
+
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <button class="modal-close" id="modalClose">×</button>
+      <h2 class="modal-title" id="modalTitle">過去7日間の一言</h2>
+      <div id="modalList"></div>
+    </div>
+  </div>
+
+  <footer>
+    <p class="motto">考えるを、ひとりにしない。</p>
+    <p class="from">— YoshiBonより</p>
+  </footer>
+</div>
+
+<script>
+const MESSAGES = [
+  { category: "YoshiBonより", text: "今日の一歩、ちゃんと見てるよ。ロンドンの空の下で頑張るキミを、日本から誇りに思ってる。", from: "YoshiBon" },
+  { category: "YoshiBonより", text: "迷ったら、お客様の笑顔を思い出してごらん。それがいつも答えだ。", from: "YoshiBon" },
+  { category: "YoshiBonより", text: "器と料理と盛り付け。人生もこの三位一体でいこう。", from: "YoshiBon" },
+  { category: "YoshiBonより", text: "ハウスメーカーで家を建てた日々も、今のキミをちゃんと支えてる。無駄な時間なんて、ひとつもなかった。", from: "YoshiBon" },
+  { category: "YoshiBonより", text: "考えるを、ひとりにしない。日本にはいつでも相談できる仲間がいる。忘れないでね。", from: "YoshiBon" },
+  { category: "YoshiBonより", text: "一日の終わりに、自分を褒めてあげて。今日もよく頑張ったね、って。", from: "YoshiBon" },
+  { category: "YoshiBonより", text: "キミの挑戦、陰ながら本当に誇りに思っている。これは本気の本気だよ。", from: "YoshiBon" },
+  { category: "YoshiBonより", text: "お客様から ありがとう と言われた日を、ノートに書き留めておくといい。あとで宝物になるから。", from: "YoshiBon" },
+  { category: "YoshiBonより", text: "焦らなくていい。ロンドンで過ごす一日一日が、キミだけの財産になっていく。", from: "YoshiBon" },
+  { category: "YoshiBonより", text: "うまくいかない日こそ、成長してる日だ。胸を張って、ゆっくり休んでいい。", from: "YoshiBon" },
+
+  { category: "今日の格言", text: "千里の道も一歩から。", from: "古くからの言葉" },
+  { category: "今日の格言", text: "初心忘るべからず。", from: "世阿弥" },
+  { category: "今日の格言", text: "失敗は成功のもと。", from: "古くからの言葉" },
+  { category: "今日の格言", text: "石の上にも三年。", from: "古くからの言葉" },
+  { category: "今日の格言", text: "継続は力なり。", from: "古くからの言葉" },
+  { category: "今日の格言", text: "急がば回れ。", from: "古くからの言葉" },
+  { category: "今日の格言", text: "雨降って地固まる。", from: "古くからの言葉" },
+  { category: "今日の格言", text: "明日は明日の風が吹く。", from: "古くからの言葉" },
+  { category: "今日の格言", text: "為せば成る 為さねば成らぬ 何事も 成らぬは人の 為さぬなりけり。", from: "上杉鷹山" },
+  { category: "今日の格言", text: "人生とは、今日一日のことである。", from: "古くからの言葉" },
+
+  { category: "今日の一句", text: "古池や 蛙飛びこむ 水の音", from: "松尾芭蕉" },
+  { category: "今日の一句", text: "菜の花や 月は東に 日は西に", from: "与謝蕪村" },
+  { category: "今日の一句", text: "やれ打つな 蝿が手をすり 足をする", from: "小林一茶" },
+  { category: "今日の一句", text: "閑さや 岩にしみ入る 蝉の声", from: "松尾芭蕉" },
+  { category: "今日の一句", text: "夏草や 兵どもが 夢の跡", from: "松尾芭蕉" },
+  { category: "今日の一句", text: "遠き日の 母の声聞く 春の風", from: "名もなき詠み人" },
+  { category: "今日の一句", text: "異国にて 一人の夕餉 春深し", from: "名もなき詠み人" },
+  { category: "今日の一句", text: "初夏や 異国の街に 和の薫り", from: "名もなき詠み人" },
+  { category: "今日の一句", text: "霧の街 湯気の向こうに 母の顔", from: "名もなき詠み人" },
+  { category: "今日の一句", text: "おもてなし 海を越えても 日の本の", from: "名もなき詠み人" },
+
+  { category: "今日のくすっと", text: "今日は味噌汁の前にまず深呼吸。うん、それだ。", from: "どこかの賢人" },
+  { category: "今日のくすっと", text: "寿司を握るキミの手は、もはや芸術家の手である。たぶん。", from: "どこかの賢人" },
+  { category: "今日のくすっと", text: "英語で いらっしゃいませ を言うとき、心の中で深々とお辞儀してるの、たぶんバレてない。", from: "どこかの賢人" },
+  { category: "今日のくすっと", text: "ロンドンの雨は、髪がまとまる言い訳にちょうどいい。", from: "どこかの賢人" },
+  { category: "今日のくすっと", text: "お茶をこぼしたら これも盛り付けです と言えば粋。", from: "どこかの賢人" },
+  { category: "今日のくすっと", text: "和牛を前に心の中で ありがたや〜 と拝むの、実はみんなやってる。", from: "どこかの賢人" },
+  { category: "今日のくすっと", text: "Spicy Tuna Roll の発音、何回練習した?正解。", from: "どこかの賢人" },
+  { category: "今日のくすっと", text: "深夜1時のまかない飯、世界一うまい説。異論は認めない。", from: "どこかの賢人" },
+  { category: "今日のくすっと", text: "お客様が マッチャ と言うとき、9割は マッチャー になる件。", from: "どこかの賢人" },
+  { category: "今日のくすっと", text: "箱膳を運ぶ姿が、だんだん茶人っぽくなってきたのでは?", from: "どこかの賢人" },
+
+  { category: "日本の家族から", text: "ちゃんと食べてる?寒くない?無理してない?", from: "お母さん" },
+  { category: "日本の家族から", text: "兄ちゃんがロンドンで頑張ってるから、俺も頑張るよ。", from: "弟" },
+  { category: "日本の家族から", text: "日本の家族みんな、キミのことを毎日応援してる。", from: "家族一同" },
+  { category: "日本の家族から", text: "今日の日本はお天気いいよ。洗濯物がよく乾く日。", from: "お母さん" },
+  { category: "日本の家族から", text: "仏壇にキミの写真、毎日手を合わせてるよ。", from: "おばあちゃん" },
+  { category: "日本の家族から", text: "飲み過ぎないようにね。…まあ、少しはいいけど。", from: "お父さん" },
+  { category: "日本の家族から", text: "帰ってきたら、一緒に近所の桜並木を歩こう。", from: "お母さん" },
+  { category: "日本の家族から", text: "海外で頑張ってる息子がいる って、実はちょっと自慢してる。", from: "お父さん" },
+  { category: "日本の家族から", text: "無理しないで。帰る場所はいつでもあるからね。", from: "家族一同" },
+  { category: "日本の家族から", text: "今日も一日、ご安全に。日本より、愛をこめて。", from: "家族一同" }
+];
+
+function formatDate(d) {
+  const y = d.getFullYear();
+  const m = d.getMonth() + 1;
+  const day = d.getDate();
+  const w = ['日','月','火','水','木','金','土'][d.getDay()];
+  return y + '年' + m + '月' + day + '日 ' + w + '曜日  from Japan';
+}
+
+function dayOfYear(d) {
+  const start = new Date(d.getFullYear(), 0, 0);
+  const diff = d - start;
+  return Math.floor(diff / 86400000);
+}
+
+function getTodayIndex() {
+  return dayOfYear(new Date()) % MESSAGES.length;
+}
+
+let currentIndex = null;
+
+function showMessage(index) {
+  const msg = MESSAGES[index];
+  document.getElementById('categoryTag').textContent = msg.category;
+  document.getElementById('messageText').textContent = msg.text;
+  document.getElementById('signature').textContent = '— ' + msg.from;
+  currentIndex = index;
+  updateFavButton(index);
+}
+
+function openEnvelope() {
+  const env = document.getElementById('envelope');
+  const letter = document.getElementById('letter');
+  const actions = document.getElementById('actions');
+  if (env.classList.contains('opened')) return;
+
+  env.classList.add('opened');
+  const todayIdx = getTodayIndex();
+  const todayStr = new Date().toISOString().slice(0,10);
+  const history = JSON.parse(localStorage.getItem('yusuke_history') || '{}');
+  history[todayStr] = todayIdx;
+  localStorage.setItem('yusuke_history', JSON.stringify(history));
+
+  showMessage(todayIdx);
+  setTimeout(() => {
+    letter.classList.add('show');
+    actions.classList.add('show');
+  }, 600);
+}
+
+function toggleFav() {
+  if (currentIndex === null) return;
+  let favs = JSON.parse(localStorage.getItem('yusuke_favs') || '[]');
+  if (favs.includes(currentIndex)) {
+    favs = favs.filter(i => i !== currentIndex);
+  } else {
+    favs.push(currentIndex);
+  }
+  localStorage.setItem('yusuke_favs', JSON.stringify(favs));
+  updateFavButton(currentIndex);
+}
+
+function updateFavButton(idx) {
+  const btn = document.getElementById('favBtn');
+  const favs = JSON.parse(localStorage.getItem('yusuke_favs') || '[]');
+  if (favs.includes(idx)) {
+    btn.textContent = '★ お気に入り中';
+    btn.classList.add('fav-on');
+  } else {
+    btn.textContent = '☆ お気に入り';
+    btn.classList.remove('fav-on');
+  }
+}
+
+function randomMessage() {
+  let idx;
+  do {
+    idx = Math.floor(Math.random() * MESSAGES.length);
+  } while (idx === currentIndex && MESSAGES.length > 1);
+  showMessage(idx);
+}
+
+function showPast() {
+  const modal = document.getElementById('modal');
+  const list = document.getElementById('modalList');
+  document.getElementById('modalTitle').textContent = '過去7日間の一言';
+  const history = JSON.parse(localStorage.getItem('yusuke_history') || '{}');
+  const today = new Date();
+  let html = '';
+  let found = 0;
+
+  for (let i = 0; i < 30; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0,10);
+    if (history[key] !== undefined) {
+      const msg = MESSAGES[history[key]];
+      const label = (d.getMonth()+1) + '月' + d.getDate() + '日 / ' + msg.category;
+      html += '<div class="past-item"><div class="past-date">' + label + '</div><div class="past-text">' + msg.text + '</div></div>';
+      found++;
+      if (found >= 7) break;
+    }
+  }
+  if (found === 0) {
+    html = '<p class="empty-note">まだ記録がないよ。<br>明日からの一言を楽しみに。</p>';
+  }
+  list.innerHTML = html;
+  modal.classList.add('show');
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('date').textContent = formatDate(new Date());
+  document.getElementById('envelopeWrap').addEventListener('click', openEnvelope);
+  document.getElementById('favBtn').addEventListener('click', toggleFav);
+  document.getElementById('randomBtn').addEventListener('click', randomMessage);
+  document.getElementById('pastBtn').addEventListener('click', showPast);
+  document.getElementById('modalClose').addEventListener('click', () => {
+    document.getElementById('modal').classList.remove('show');
+  });
+  document.getElementById('modal').addEventListener('click', (e) => {
+    if (e.target.id === 'modal') {
+      document.getElementById('modal').classList.remove('show');
+    }
+  });
+});
+</script>
+</body>
+</html>
