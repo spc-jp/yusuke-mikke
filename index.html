@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>裕介みっけ 〜ロンドンで頑張るキミへ〜</title>
- <!-- ファビコン -->
+
+<!-- ファビコン -->
 <link rel="icon" type="image/png" href="https://spc-jp.github.io/yusuke-mikke/favicon.png">
 <link rel="apple-touch-icon" href="https://spc-jp.github.io/yusuke-mikke/favicon.png">
 
-<!-- OGP（LINE・Facebook・X共通） -->
+<!-- OGP -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://spc-jp.github.io/yusuke-mikke/">
 <meta property="og:title" content="裕介みっけ 〜ロンドンで頑張るキミへ〜">
@@ -24,6 +25,7 @@
 <meta name="twitter:title" content="裕介みっけ 〜ロンドンで頑張るキミへ〜">
 <meta name="twitter:description" content="朝ひらく、日本からの一言。封筒をあけると、今日のキミに届く言葉があるよ。">
 <meta name="twitter:image" content="https://spc-jp.github.io/yusuke-mikke/ogp.png">
+
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -176,7 +178,7 @@
   .message-text {
     font-size: 19px;
     line-height: 2;
-    margin-bottom: 30px;
+    margin-bottom: 24px;
     white-space: pre-wrap;
   }
   .signature {
@@ -184,6 +186,7 @@
     font-size: 13px;
     opacity: 0.7;
     letter-spacing: 1px;
+    margin-bottom: 20px;
   }
   .seal {
     position: absolute;
@@ -201,6 +204,65 @@
     font-weight: bold;
     transform: rotate(-10deg);
     background: rgba(250,246,234,0.8);
+  }
+
+  /* 展開ボタン */
+  .toggle-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+    padding-bottom: 8px;
+  }
+  .toggle-btn {
+    flex: 1;
+    background: var(--paper);
+    border: 1.5px dashed var(--gold);
+    color: var(--ink);
+    padding: 10px 8px;
+    font-family: inherit;
+    font-size: 12px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s;
+  }
+  .toggle-btn:hover, .toggle-btn.active {
+    background: rgba(184,134,11,0.1);
+  }
+  .toggle-btn.active {
+    border-style: solid;
+    color: var(--gold);
+  }
+
+  .extra-box {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+  }
+  .extra-box.open { max-height: 500px; }
+  .extra-content {
+    padding: 14px 16px;
+    margin-top: 10px;
+    background: rgba(184,134,11,0.06);
+    border-left: 3px solid var(--gold);
+    border-radius: 0 6px 6px 0;
+  }
+  .extra-label {
+    font-size: 10px;
+    color: var(--gold);
+    font-weight: bold;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+  .extra-text {
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--ink);
+  }
+  .english-text {
+    font-family: Georgia, "Times New Roman", serif;
+    font-style: italic;
+    color: var(--ink);
   }
 
   /* ボタン */
@@ -310,6 +372,8 @@
     .envelope { height: 200px; }
     .flap { height: 100px; }
     .message-text { font-size: 17px; }
+    .extra-text { font-size: 13px; }
+    .toggle-btn { font-size: 11px; padding: 9px 4px; }
   }
 </style>
 </head>
@@ -334,6 +398,24 @@
     <span class="category-tag" id="categoryTag"></span>
     <p class="message-text" id="messageText"></p>
     <p class="signature" id="signature"></p>
+
+    <div class="toggle-row">
+      <button class="toggle-btn" id="toggleNote">💭 一言メモ</button>
+      <button class="toggle-btn" id="toggleEng">🇬🇧 English</button>
+    </div>
+    <div class="extra-box" id="noteBox">
+      <div class="extra-content">
+        <div class="extra-label">💭 ひとこと解説</div>
+        <div class="extra-text" id="noteText"></div>
+      </div>
+    </div>
+    <div class="extra-box" id="engBox">
+      <div class="extra-content">
+        <div class="extra-label">🇬🇧 ENGLISH</div>
+        <div class="extra-text english-text" id="engText"></div>
+      </div>
+    </div>
+
     <div class="seal">心</div>
   </article>
 
@@ -359,60 +441,137 @@
 
 <script>
 const MESSAGES = [
-  { category: "YoshiBonより", text: "今日の一歩、ちゃんと見てるよ。ロンドンの空の下で頑張るキミを、日本から誇りに思ってる。", from: "YoshiBon" },
-  { category: "YoshiBonより", text: "迷ったら、お客様の笑顔を思い出してごらん。それがいつも答えだ。", from: "YoshiBon" },
-  { category: "YoshiBonより", text: "器と料理と盛り付け。人生もこの三位一体でいこう。", from: "YoshiBon" },
-  { category: "YoshiBonより", text: "ハウスメーカーで家を建てた日々も、今のキミをちゃんと支えてる。無駄な時間なんて、ひとつもなかった。", from: "YoshiBon" },
-  { category: "YoshiBonより", text: "考えるを、ひとりにしない。日本にはいつでも相談できる仲間がいる。忘れないでね。", from: "YoshiBon" },
-  { category: "YoshiBonより", text: "一日の終わりに、自分を褒めてあげて。今日もよく頑張ったね、って。", from: "YoshiBon" },
-  { category: "YoshiBonより", text: "キミの挑戦、陰ながら本当に誇りに思っている。これは本気の本気だよ。", from: "YoshiBon" },
-  { category: "YoshiBonより", text: "お客様から ありがとう と言われた日を、ノートに書き留めておくといい。あとで宝物になるから。", from: "YoshiBon" },
-  { category: "YoshiBonより", text: "焦らなくていい。ロンドンで過ごす一日一日が、キミだけの財産になっていく。", from: "YoshiBon" },
-  { category: "YoshiBonより", text: "うまくいかない日こそ、成長してる日だ。胸を張って、ゆっくり休んでいい。", from: "YoshiBon" },
+  // === YoshiBonより ===
+  { category: "YoshiBonより", text: "今日の一歩、ちゃんと見てるよ。ロンドンの空の下で頑張るキミを、日本から誇りに思ってる。", from: "YoshiBon",
+    note: "キミに勇気を届ける一言だよ。今日、不安に負けそうな瞬間があったら思い出して。", english: "I see every step you take. We're proud of you, fighting under the London sky." },
+  { category: "YoshiBonより", text: "迷ったら、お客様の笑顔を思い出してごらん。それがいつも答えだ。", from: "YoshiBon",
+    note: "迷う時こそ原点に立ち返ろう。キミの仕事の答えは、いつも目の前にある。", english: "When in doubt, picture your guests' smiles. The answer is always there." },
+  { category: "YoshiBonより", text: "器と料理と盛り付け。人生もこの三位一体でいこう。", from: "YoshiBon",
+    note: "AKIRAの哲学は、そのまま生き方の哲学になる。今日もていねいに。", english: "Tableware, food, and presentation - the trinity. Let's live our lives the same way." },
+  { category: "YoshiBonより", text: "若い頃の経験は、今のキミをちゃんと支えてる。無駄な時間なんて、ひとつもなかった。", from: "YoshiBon",
+    note: "過去を否定しないで。すべての経験が、今日のキミを作っている。", english: "Your past experiences are still supporting you. Not a single moment was wasted." },
+  { category: "YoshiBonより", text: "考えるを、ひとりにしない。日本にはいつでも相談できる仲間がいる。忘れないでね。", from: "YoshiBon",
+    note: "孤独に感じる夜こそ、誰かに話してみて。日本はいつでもキミの味方だ。", english: "Don't think alone. You have people back in Japan ready to listen. Always remember that." },
+  { category: "YoshiBonより", text: "一日の終わりに、自分を褒めてあげて。今日もよく頑張ったね、って。", from: "YoshiBon",
+    note: "他人より、まず自分を認めよう。それが明日への最大のエネルギーになる。", english: "At the end of each day, praise yourself. Tell yourself - you did well today." },
+  { category: "YoshiBonより", text: "キミの挑戦、陰ながら本当に誇りに思っている。これは本気の本気だよ。", from: "YoshiBon",
+    note: "見えない応援こそ、いちばん強い。日本からの誇り、ちゃんと受け取ってね。", english: "I'm truly proud of your challenge. I mean it from the bottom of my heart." },
+  { category: "YoshiBonより", text: "お客様から ありがとう と言われた日を、ノートに書き留めておくといい。あとで宝物になるから。", from: "YoshiBon",
+    note: "感謝の言葉は、未来のキミへの贈り物。1行でも残しておこう。", english: "Write down every 'thank you' you receive. They'll become treasures one day." },
+  { category: "YoshiBonより", text: "焦らなくていい。ロンドンで過ごす一日一日が、キミだけの財産になっていく。", from: "YoshiBon",
+    note: "成長は急がなくていい。日々の積み重ねが、いちばんの財産になる。", english: "Don't rush. Each day in London is becoming your unique treasure." },
+  { category: "YoshiBonより", text: "うまくいかない日こそ、成長してる日だ。胸を張って、ゆっくり休んでいい。", from: "YoshiBon",
+    note: "うまくいかない日は成長日。罪悪感なしに、ゆっくり休もう。", english: "On the hardest days, you're growing the most. Be proud, and rest well." },
 
-  { category: "今日の格言", text: "千里の道も一歩から。", from: "古くからの言葉" },
-  { category: "今日の格言", text: "初心忘るべからず。", from: "世阿弥" },
-  { category: "今日の格言", text: "失敗は成功のもと。", from: "古くからの言葉" },
-  { category: "今日の格言", text: "石の上にも三年。", from: "古くからの言葉" },
-  { category: "今日の格言", text: "継続は力なり。", from: "古くからの言葉" },
-  { category: "今日の格言", text: "急がば回れ。", from: "古くからの言葉" },
-  { category: "今日の格言", text: "雨降って地固まる。", from: "古くからの言葉" },
-  { category: "今日の格言", text: "明日は明日の風が吹く。", from: "古くからの言葉" },
-  { category: "今日の格言", text: "為せば成る 為さねば成らぬ 何事も 成らぬは人の 為さぬなりけり。", from: "上杉鷹山" },
-  { category: "今日の格言", text: "人生とは、今日一日のことである。", from: "古くからの言葉" },
+  // === 今日の格言 ===
+  { category: "今日の格言", text: "千里の道も一歩から。", from: "古くからの言葉",
+    note: "大きな夢も、今日の一歩から始まる。焦らずに行こう。", english: "A journey of a thousand miles begins with a single step." },
+  { category: "今日の格言", text: "初心忘るべからず。", from: "世阿弥",
+    note: "ロンドンに渡った日の気持ちを、時々思い出してみて。", english: "Never forget the heart with which you began." },
+  { category: "今日の格言", text: "失敗は成功のもと。", from: "古くからの言葉",
+    note: "失敗を恐れないで。それは成功への一歩前進だよ。", english: "Failure is the foundation of success." },
+  { category: "今日の格言", text: "石の上にも三年。", from: "古くからの言葉",
+    note: "続ければ、必ず花は咲く。今日の苦しさは未来の宝。", english: "Even on a cold stone, three years of patience brings warmth." },
+  { category: "今日の格言", text: "継続は力なり。", from: "古くからの言葉",
+    note: "毎日の小さな積み重ねが、やがてキミの実力になる。", english: "Continuity itself is power." },
+  { category: "今日の格言", text: "急がば回れ。", from: "古くからの言葉",
+    note: "急ぐ時こそ、深呼吸して。遠回りが一番の近道。", english: "When in a hurry, take the long way around." },
+  { category: "今日の格言", text: "雨降って地固まる。", from: "古くからの言葉",
+    note: "つらい時を越えると、関係も心も強くなる。", english: "After the rain, the ground hardens." },
+  { category: "今日の格言", text: "明日は明日の風が吹く。", from: "古くからの言葉",
+    note: "今日の悩みは今日まで。明日にはまた新しい風が吹くよ。", english: "Tomorrow brings its own winds. Don't carry today's worries." },
+  { category: "今日の格言", text: "為せば成る 為さねば成らぬ 何事も 成らぬは人の 為さぬなりけり。", from: "上杉鷹山",
+    note: "やればできる。やらないから出来ないだけ。今日の一歩を。", english: "If you do it, it will be done. What isn't done, simply wasn't attempted." },
+  { category: "今日の格言", text: "人生とは、今日一日のことである。", from: "古くからの言葉",
+    note: "未来も過去もいったん置いて、今日を生き切ろう。", english: "Life is just this one day, today." },
 
-  { category: "今日の一句", text: "古池や 蛙飛びこむ 水の音", from: "松尾芭蕉" },
-  { category: "今日の一句", text: "菜の花や 月は東に 日は西に", from: "与謝蕪村" },
-  { category: "今日の一句", text: "やれ打つな 蝿が手をすり 足をする", from: "小林一茶" },
-  { category: "今日の一句", text: "閑さや 岩にしみ入る 蝉の声", from: "松尾芭蕉" },
-  { category: "今日の一句", text: "夏草や 兵どもが 夢の跡", from: "松尾芭蕉" },
-  { category: "今日の一句", text: "遠き日の 母の声聞く 春の風", from: "名もなき詠み人" },
-  { category: "今日の一句", text: "異国にて 一人の夕餉 春深し", from: "名もなき詠み人" },
-  { category: "今日の一句", text: "初夏や 異国の街に 和の薫り", from: "名もなき詠み人" },
-  { category: "今日の一句", text: "霧の街 湯気の向こうに 母の顔", from: "名もなき詠み人" },
-  { category: "今日の一句", text: "おもてなし 海を越えても 日の本の", from: "名もなき詠み人" },
+  // === 今日の一句 ===
+  { category: "今日の一句", text: "古池や 蛙飛びこむ 水の音", from: "松尾芭蕉",
+    note: "静けさの中の小さな音に気づける一日を。", english: "An old pond - a frog leaps in - the sound of water." },
+  { category: "今日の一句", text: "菜の花や 月は東に 日は西に", from: "与謝蕪村",
+    note: "東と西、日本とロンドン。空はつながっているよ。", english: "Rapeseed flowers - the moon in the east, the sun in the west." },
+  { category: "今日の一句", text: "やれ打つな 蝿が手をすり 足をする", from: "小林一茶",
+    note: "小さな命にも優しさを。それがキミの強さだ。", english: "Don't swat - the fly rubs its hands, rubs its feet, pleading." },
+  { category: "今日の一句", text: "閑さや 岩にしみ入る 蝉の声", from: "松尾芭蕉",
+    note: "静寂と命の音。心を澄ます瞬間を、今日もどこかに。", english: "Such stillness - cicadas' cries soak into the rocks." },
+  { category: "今日の一句", text: "夏草や 兵どもが 夢の跡", from: "松尾芭蕉",
+    note: "強かった人々の夢の跡。キミの今日も、誰かの希望になる。", english: "Summer grass - all that remains of warriors' dreams." },
+  { category: "今日の一句", text: "遠き日の 母の声聞く 春の風", from: "名もなき詠み人",
+    note: "春風にお母さんの声を感じる時、キミは一人じゃない。", english: "In the spring breeze, I hear my mother's voice from long ago." },
+  { category: "今日の一句", text: "異国にて 一人の夕餉 春深し", from: "名もなき詠み人",
+    note: "一人の夕食も、キミの物語の大切な一場面。", english: "A solitary dinner in a foreign land, deep in spring." },
+  { category: "今日の一句", text: "初夏や 異国の街に 和の薫り", from: "名もなき詠み人",
+    note: "ロンドンの空気に、キミ自身が日本の薫りを運んでいる。", english: "Early summer - the scent of Japan drifts through a foreign town." },
+  { category: "今日の一句", text: "霧の街 湯気の向こうに 母の顔", from: "名もなき詠み人",
+    note: "霧の朝、味噌汁の湯気にお母さんの面影を。", english: "Misty city - beyond the steam, my mother's face." },
+  { category: "今日の一句", text: "おもてなし 海を越えても 日の本の", from: "名もなき詠み人",
+    note: "おもてなしの心は、海を越えてもキミの中で生きている。", english: "Omotenashi - even across the seas, the heart of Japan endures." },
 
-  { category: "今日のくすっと", text: "今日は味噌汁の前にまず深呼吸。うん、それだ。", from: "どこかの賢人" },
-  { category: "今日のくすっと", text: "寿司を握るキミの手は、もはや芸術家の手である。たぶん。", from: "どこかの賢人" },
-  { category: "今日のくすっと", text: "英語で いらっしゃいませ を言うとき、心の中で深々とお辞儀してるの、たぶんバレてない。", from: "どこかの賢人" },
-  { category: "今日のくすっと", text: "ロンドンの雨は、髪がまとまる言い訳にちょうどいい。", from: "どこかの賢人" },
-  { category: "今日のくすっと", text: "お茶をこぼしたら これも盛り付けです と言えば粋。", from: "どこかの賢人" },
-  { category: "今日のくすっと", text: "和牛を前に心の中で ありがたや〜 と拝むの、実はみんなやってる。", from: "どこかの賢人" },
-  { category: "今日のくすっと", text: "Spicy Tuna Roll の発音、何回練習した?正解。", from: "どこかの賢人" },
-  { category: "今日のくすっと", text: "深夜1時のまかない飯、世界一うまい説。異論は認めない。", from: "どこかの賢人" },
-  { category: "今日のくすっと", text: "お客様が マッチャ と言うとき、9割は マッチャー になる件。", from: "どこかの賢人" },
-  { category: "今日のくすっと", text: "箱膳を運ぶ姿が、だんだん茶人っぽくなってきたのでは?", from: "どこかの賢人" },
+  // === 今日のくすっと ===
+  { category: "今日のくすっと", text: "今日は味噌汁の前にまず深呼吸。うん、それだ。", from: "どこかの賢人",
+    note: "朝の小さな儀式が、一日を整えてくれるよ。", english: "Today, take a deep breath before the miso soup. Yes, that's the way." },
+  { category: "今日のくすっと", text: "寿司を握るキミの手は、もはや芸術家の手である。たぶん。", from: "どこかの賢人",
+    note: "毎日の積み重ねが、キミの手を芸術品に変えていく。たぶん。", english: "Your sushi-rolling hands are basically an artist's hands now. Probably." },
+  { category: "今日のくすっと", text: "英語で いらっしゃいませ を言うとき、心の中で深々とお辞儀してるの、たぶんバレてない。", from: "どこかの賢人",
+    note: "心の中の礼儀こそ、本当のおもてなし。お客様には伝わってる。", english: "When you say 'Welcome' in English, you're secretly bowing inside. They probably can't tell. Probably." },
+  { category: "今日のくすっと", text: "ロンドンの雨は、髪がまとまる言い訳にちょうどいい。", from: "どこかの賢人",
+    note: "天気のせいにしていい日も、たまにはあるよね。", english: "London rain - the perfect excuse for unruly hair." },
+  { category: "今日のくすっと", text: "お茶をこぼしたら これも盛り付けです と言えば粋。", from: "どこかの賢人",
+    note: "失敗を笑いに変えられたら、それも才能。", english: "If you spill the tea, just say 'this is part of the presentation.' Stylish." },
+  { category: "今日のくすっと", text: "和牛を前に心の中で ありがたや〜 と拝むの、実はみんなやってる。", from: "どこかの賢人",
+    note: "食材への感謝の心は、料理人の証だよ。", english: "Bowing to wagyu in your mind before cooking - we all do it. Don't worry." },
+  { category: "今日のくすっと", text: "Spicy Tuna Roll の発音、何回練習した?正解。", from: "どこかの賢人",
+    note: "練習したぶんだけ、キミの英語は確実に育ってる。", english: "How many times did you practice 'Spicy Tuna Roll'? Exactly. That's the right answer." },
+  { category: "今日のくすっと", text: "深夜1時のまかない飯、世界一うまい説。異論は認めない。", from: "どこかの賢人",
+    note: "疲れた後の一杯。それが今日のキミへのご褒美。", english: "Late-night staff meal at 1AM - the best meal in the world. No arguments accepted." },
+  { category: "今日のくすっと", text: "お客様が マッチャ と言うとき、9割は マッチャー になる件。", from: "どこかの賢人",
+    note: "言葉のすれ違いも、笑顔で受け止めてあげて。", english: "When customers say 'matcha,' 90% of them say 'mat-cha-aaaa.' True story." },
+  { category: "今日のくすっと", text: "箱膳を運ぶ姿が、だんだん茶人っぽくなってきたのでは?", from: "どこかの賢人",
+    note: "気がつかないうちに、キミは確実に進化してる。", english: "Carrying the hakozen tray - are you slowly becoming a tea master?" },
 
-  { category: "日本の家族から", text: "ちゃんと食べてる?寒くない?無理してない?", from: "お母さん" },
-  { category: "日本の家族から", text: "兄ちゃんがロンドンで頑張ってるから、俺も頑張るよ。", from: "弟" },
-  { category: "日本の家族から", text: "日本の家族みんな、キミのことを毎日応援してる。", from: "家族一同" },
-  { category: "日本の家族から", text: "今日の日本はお天気いいよ。洗濯物がよく乾く日。", from: "お母さん" },
-  { category: "日本の家族から", text: "仏壇にキミの写真、毎日手を合わせてるよ。", from: "おばあちゃん" },
-  { category: "日本の家族から", text: "飲み過ぎないようにね。…まあ、少しはいいけど。", from: "お父さん" },
-  { category: "日本の家族から", text: "帰ってきたら、一緒に近所の桜並木を歩こう。", from: "お母さん" },
-  { category: "日本の家族から", text: "海外で頑張ってる息子がいる って、実はちょっと自慢してる。", from: "お父さん" },
-  { category: "日本の家族から", text: "無理しないで。帰る場所はいつでもあるからね。", from: "家族一同" },
-  { category: "日本の家族から", text: "今日も一日、ご安全に。日本より、愛をこめて。", from: "家族一同" }
+  // === 日本の家族から ===
+  { category: "日本の家族から", text: "ちゃんと食べてる?寒くない?無理してない?", from: "お母さん",
+    note: "お母さんはいつでもキミを心配してる。それが愛情。", english: "Are you eating well? Are you cold? Are you pushing yourself too hard?" },
+  { category: "日本の家族から", text: "兄ちゃんがロンドンで頑張ってるから、俺も頑張るよ。", from: "弟",
+    note: "キミの挑戦は、誰かの背中も押している。", english: "My brother's working hard in London, so I'll work hard too." },
+  { category: "日本の家族から", text: "日本の家族みんな、キミのことを毎日応援してる。", from: "家族一同",
+    note: "見えない応援が、いちばん大きな力になる。", english: "Your whole family back home roots for you every single day." },
+  { category: "日本の家族から", text: "今日の日本はお天気いいよ。洗濯物がよく乾く日。", from: "お母さん",
+    note: "些細な日常の報告に、深い愛情が宿っている。", english: "Beautiful weather in Japan today. Perfect for drying the laundry." },
+  { category: "日本の家族から", text: "仏壇にキミの写真、毎日手を合わせてるよ。", from: "おばあちゃん",
+    note: "おばあちゃんの祈りが、キミを毎日守ってくれてる。", english: "I pray for you in front of the family altar every day." },
+  { category: "日本の家族から", text: "飲み過ぎないようにね。…まあ、少しはいいけど。", from: "お父さん",
+    note: "不器用な優しさも、お父さんからの愛情表現。", english: "Don't drink too much. Well, a little is fine, I guess." },
+  { category: "日本の家族から", text: "帰ってきたら、一緒に近所の桜並木を歩こう。", from: "お母さん",
+    note: "未来の約束は、心の支え。いつかその日がくる。", english: "When you come home, let's walk under the cherry blossoms together." },
+  { category: "日本の家族から", text: "海外で頑張ってる息子がいる って、実はちょっと自慢してる。", from: "お父さん",
+    note: "口に出さない誇り。でもちゃんと届いているよ。", english: "I quietly brag about having a son who's working abroad. Just a little." },
+  { category: "日本の家族から", text: "無理しないで。帰る場所はいつでもあるからね。", from: "家族一同",
+    note: "帰る場所があるから、安心して挑戦できる。", english: "Don't push too hard. There's always a home waiting for you." },
+  { category: "日本の家族から", text: "今日も一日、ご安全に。日本より、愛をこめて。", from: "家族一同",
+    note: "シンプルな祈りに、家族の全部が詰まってる。", english: "Stay safe today. With love, from Japan." },
+
+  // === サッカー&ひとこと ===
+  { category: "サッカー&ひとこと", text: "90分のうち、調子のいい時間は意外と短い。 大事なのは、悪い時間帯にどれだけ走れるか。 厨房も、人生も、同じだよ。", from: "ピッチからの言葉",
+    note: "うまくいかない時間こそ、キミの真価が問われる。今日の苦しさが、明日の力になる。", english: "Of 90 minutes, the good moments are surprisingly short. What matters is how you run during the tough ones. Same in the kitchen. Same in life." },
+  { category: "サッカー&ひとこと", text: "ハーフタイムには、必ず立て直せる。 今日が前半でも後半でも、 まだ試合は終わってない。", from: "ピッチからの言葉",
+    note: "今日がしんどくても、まだ試合は続いている。立て直すチャンスは必ず来る。", english: "There's always halftime to regroup. Whether you're in the first half or the second, the match isn't over yet." },
+  { category: "サッカー&ひとこと", text: "パスは、信じられる仲間にしか出せない。 厨房の仲間も、お客様も、 信頼を一つずつ積み上げていこう。", from: "ピッチからの言葉",
+    note: "信頼は一夜にして築けない。一つずつ、丁寧に積み重ねていこう。", english: "You only pass to teammates you trust. Build that trust - one play, one customer at a time." },
+  { category: "サッカー&ひとこと", text: "サッカーの神様は、最後まで走り抜いた選手にだけ微笑む。 キミは、最後の一秒まで走れる男だ。", from: "ピッチからの言葉",
+    note: "最後まで諦めない姿勢が、キミの一番の武器。今日も走り抜こう。", english: "The football gods only smile on those who run until the final whistle. You're a man who can run to the very last second." },
+  { category: "サッカー&ひとこと", text: "ロスタイムって、絶望じゃなく希望の時間。 1点取り返せる時間が、まだ残ってる。 焦らないで、いこう。", from: "ピッチからの言葉",
+    note: "残された時間は、絶望じゃなく希望。最後まで諦めない理由がそこにある。", english: "Stoppage time isn't despair - it's hope. There's still time to score. Don't panic. Let's go." },
+  { category: "サッカー&ひとこと", text: "本場イギリスのスタジアムでは、 負けてる側のサポーターほど大声で歌う。 苦しい時に応援する人が、本物のサポーターだ。 僕は、キミの一番のサポーターだよ。", from: "ピッチからの言葉",
+    note: "キミの一番のサポーターは、いつも変わらず日本にいるよ。", english: "In English stadiums, the losing side's supporters sing the loudest. Real supporters cheer when it's hard. I'm your number one supporter." },
+  { category: "サッカー&ひとこと", text: "守備を頑張った日は、地味でも誇っていい。 1点取らなくても、1失点を防いだ日は、 同じくらい価値がある。", from: "ピッチからの言葉",
+    note: "派手じゃなくていい。地味な努力こそ、誇るべき価値だよ。", english: "Days when you defend well deserve pride too. Preventing a goal is just as valuable as scoring one." },
+  { category: "サッカー&ひとこと", text: "ベンチで見てた試合は、ピッチに立った時の財産になる。 ハウスメーカー時代も、今のキミの土台だ。 何ひとつ、無駄じゃない。", from: "ピッチからの言葉",
+    note: "過去の経験は、すべて今のキミの土台。何ひとつ無駄じゃない。", english: "Time on the bench becomes treasure when you take the field. Your past job is the foundation of who you are now. Nothing's wasted." },
+  { category: "サッカー&ひとこと", text: "ドリブルで抜けない日は、パスでつなげばいい。 英語が出ない日は、笑顔でつなげばいい。 道は、ひとつじゃないんだ。", from: "ピッチからの言葉",
+    note: "うまくいかない時は、別の方法で。道は必ず複数ある。", english: "Can't dribble past? Pass instead. Words don't come? Smile instead. There's never just one way." },
+  { category: "サッカー&ひとこと", text: "大学まで、ずっとピッチに立ち続けたキミなら、 厨房というピッチでも必ず立てる。 試合は始まったばかりだ。", from: "ピッチからの言葉",
+    note: "ピッチで培った勝負強さは、厨房でも必ず光る。試合はまだ始まったばかり。", english: "If you stood on the field through university, you can stand on this kitchen field too. The game has only just begun." }
 ];
 
 function formatDate(d) {
@@ -440,6 +599,13 @@ function showMessage(index) {
   document.getElementById('categoryTag').textContent = msg.category;
   document.getElementById('messageText').textContent = msg.text;
   document.getElementById('signature').textContent = '— ' + msg.from;
+  document.getElementById('noteText').textContent = msg.note || '';
+  document.getElementById('engText').textContent = msg.english || '';
+  // 切り替え時に展開を閉じる
+  document.getElementById('noteBox').classList.remove('open');
+  document.getElementById('engBox').classList.remove('open');
+  document.getElementById('toggleNote').classList.remove('active');
+  document.getElementById('toggleEng').classList.remove('active');
   currentIndex = index;
   updateFavButton(index);
 }
@@ -524,12 +690,21 @@ function showPast() {
   modal.classList.add('show');
 }
 
+function toggleBox(boxId, btnId) {
+  const box = document.getElementById(boxId);
+  const btn = document.getElementById(btnId);
+  box.classList.toggle('open');
+  btn.classList.toggle('active');
+}
+
 window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('date').textContent = formatDate(new Date());
   document.getElementById('envelopeWrap').addEventListener('click', openEnvelope);
   document.getElementById('favBtn').addEventListener('click', toggleFav);
   document.getElementById('randomBtn').addEventListener('click', randomMessage);
   document.getElementById('pastBtn').addEventListener('click', showPast);
+  document.getElementById('toggleNote').addEventListener('click', () => toggleBox('noteBox', 'toggleNote'));
+  document.getElementById('toggleEng').addEventListener('click', () => toggleBox('engBox', 'toggleEng'));
   document.getElementById('modalClose').addEventListener('click', () => {
     document.getElementById('modal').classList.remove('show');
   });
